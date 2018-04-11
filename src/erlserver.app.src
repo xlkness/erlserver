@@ -5,7 +5,9 @@
   {mod, { erlserver_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    lager,
+    ranch
    ]},
   {env,[]},
   {modules, []},

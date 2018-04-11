@@ -15,6 +15,9 @@
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
+    lager:start(),
+    {ok, _} = ranch:start_listener(erlserver,
+                                   ranch_tcp, [{port, 8888}], erlserver_user, []),
     erlserver_sup:start_link().
 
 %%--------------------------------------------------------------------
