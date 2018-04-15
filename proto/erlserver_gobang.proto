@@ -1,0 +1,123 @@
+
+enum ChessPieceColor {
+    BALCK = 1;
+    RED = 2;
+}
+
+// 心跳
+message HeartBeatReq {}
+message HeartBeatResp {}
+
+// 获取大厅房间人数，客户端可以自己间隔获取
+message GetRoomsInfoReq {}
+message GetRoomsInfoResp {
+    repeated roomInfoType rooms = 1;
+}
+
+// 加入房间
+message JoinRoomReq {
+    required uint32 join_type = 1;		// 1:随机匹配 2:选房加入
+    required string nick_name = 2;		// 未做注册、登陆，直接给昵称
+    required uint32 sex = 3;			// 性别
+    optional uint32 room_id = 4;		// 选房加入时的房间号
+}
+message JoinRoomResp {
+    required bool audience = 1;			// 是否观众席位（加入瞬间座位满了）
+    required roomInfoType room = 2;		// 加入的房间信息
+    optional uint32 remain_sec = 3;     // 不准备的剩余秒数，到时即踢
+}
+
+// 准备
+message PrepareReq {
+    required uint32 type = 1;			// 1:准备 2:取消准备
+}
+message PrepareResp {
+    required uint32 remain_sec = 1;		// 不准备的剩余秒数，到时即踢
+}
+
+// 游戏开始-服务器主动推送给客户端
+message StartGamePush {
+    required ChessPieceColor color = 1; // 我方颜色，黑棋先（如果是围观群众，不读这个字段）
+    required uint32 remain_sec = 2;		// 思考的剩余时长，如果超时了，每一次落子只有per_round_remain_sec
+    required uint32 per_round_remain_sec = 3;   // 思考的总时间花费完了，之后每一步只有这么长的时间思考，超过即输
+    repeated startDetailType detail = 4;
+    message startDetailType {		// 推送给围观群众的
+        required ChessPieceColor color = 1;
+        required userInfoType user = 2;
+    }
+}
+
+// 游戏进行
+message PlayGameReq {
+    required uint32 x_pos = 1;
+    required uint32 y_pos = 2;
+}
+message PlayGameResp {
+    required uint32 err_code = 1;
+    required uint32 remain_sec = 2;
+}
+
+// 服务器推送其他玩家落子
+message PlayBroadcastPush {
+    required ChessPieceColor color = 1;			// 棋子颜色
+    required uint32 x_pos = 2;
+    required uint32 y_pos = 3;
+}
+
+// 游戏结束
+message endGamePush {
+    required userInfoType winner = 1;			// 赢家
+}
+
+// 玩家加入房间、退出房间推送
+message userInOutPush {
+    required uint32 type = 1;					// 1.进入座位、2.进入观众席、3.退出座位、4.退出观众席
+    optional seatInfoType seat = 2;				// 座位变动才有
+    optional userInfoType user = 3;					// 观众席变动才有
+}
+
+// 座位玩家加入观众席
+message joinAudienceReq {}
+message joinAudienceResp {
+    required uint32 err_code = 1;
+}
+
+// 观众席加入座位
+message joinSeatReq {}
+message joinSeatResp {
+    required uint32 err_code = 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*内部声明*/
+// 房间信息
+message roomInfoType {
+    required uint32 room_id = 1;		// 房间id
+    repeated seatInfoType seats = 2;	// 座位信息
+    repeated userInfoType audiences = 3;// 围观群众
+}
+// 座位信息
+message seatInfoType {
+    required uint32 index = 1;			// 座位编号
+    optional userInfoType user = 2;		// 座位用户信息，空座位没有用户
+}
+// 用户信息
+message userInfoType {
+    required uint64 user_id = 1;		// 用户id
+    required string nick_name = 2;		// 昵称
+}
