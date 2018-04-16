@@ -45,12 +45,17 @@ init({Ref, Socket, Transport, _Opts = []}) ->
                           #state{socket=Socket, transport=Transport},
                           ?TIMEOUT).
 
-handle_info({tcp, Socket, Data}, State=#state{
+handle_info({tcp, Socket, <<Cmd:16, Binary/binary>> = Data}, State=#state{
     socket=Socket, transport=Transport})
     when byte_size(Data) > 1 ->
     Transport:setopts(Socket, [{active, once}]),
     {ok, PeerName} = inet:peername(Socket),
-    lager:info("receive from client[~w], msg:~p~n", [PeerName, Data]),
+    MsgName = erlserver_pb_desc:msg_type(Cmd),
+    Msg = erlserver_gobang_pb:decode_msg(Binary, MsgName),
+    lager:info("receive from client[~w], msg:~p/~p~n", [PeerName, Cmd, Msg]),
+    SendMsg = #{rooms => [#{room_id => 123, seats => [], audiences => []}]},
+    SendBin = erlserver_gobang_pb:encode_msg(SendMsg, erlserver_pb_desc:msg_type(101)),
+    Transport:send(Socket, <<101:16, SendBin/binary>>),
     {noreply, State, ?TIMEOUT};
 handle_info({tcp_closed, _Socket}, State) ->
     {stop, normal, State};

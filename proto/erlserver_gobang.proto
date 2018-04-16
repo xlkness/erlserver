@@ -65,26 +65,26 @@ message PlayBroadcastPush {
 }
 
 // 游戏结束
-message endGamePush {
+message EndGamePush {
     required userInfoType winner = 1;			// 赢家
 }
 
 // 玩家加入房间、退出房间推送
-message userInOutPush {
+message UserInOutPush {
     required uint32 type = 1;					// 1.进入座位、2.进入观众席、3.退出座位、4.退出观众席
     optional seatInfoType seat = 2;				// 座位变动才有
     optional userInfoType user = 3;					// 观众席变动才有
 }
 
 // 座位玩家加入观众席
-message joinAudienceReq {}
-message joinAudienceResp {
+message JoinAudienceReq {}
+message JoinAudienceResp {
     required uint32 err_code = 1;
 }
 
 // 观众席加入座位
-message joinSeatReq {}
-message joinSeatResp {
+message JoinSeatReq {}
+message JoinSeatResp {
     required uint32 err_code = 1;
 }
 
